@@ -1,80 +1,51 @@
-# Project Title
+# eqparse
 
-One Paragraph of project description goes here
+Python processing for eQUEST SIM, HSR, and INP files
 
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
 
-### Prerequisites
-
-What things you need to install the software and how to install them
-
-```
-Give examples
-```
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+Use pip to install this package (you can always clone and manually import it as well):
 
 ```
-Give the example
+pip install eqparse
 ```
 
-And repeat
+to Load a SIM file, use LoadSim and do not use a file extension:
 
-```
-until finished
-```
+'''
+mysim = eq.LoadSim('C:/myinputfile')
+'''
 
-End with an example of getting some data out of the system or using it for a little demo
+This allows access to 'sim', 'hsr', and 'inp' modules (inp module is currently a work in progress. Support will be added to handle running simulations and creating ECMs.
 
-## Running the tests
+Most reports can be accessed like this, returning Pandas Dataframes:
 
-Explain how to run the automated tests for this system
 
-### Break down into end to end tests
+>mysim.sim.bepu()
+>mysim.sim.ssa()
 
-Explain what these tests test and why
 
-```
-Give an example
-```
+HSR files can be accessed like this:
 
-### And coding style tests
 
-Explain what these tests test and why
+>df = mysim.hsr.df
 
-```
-Give an example
-```
 
-## Deployment
 
-Add additional notes about how to deploy this on a live system
+There are also some plotting functions, using Plotly, optimized for eQUEST HSR files:
 
-## Built With
+>mysim.hsr.plot.line(df)
+>mysim.hsr.plot.heatmap(df, 0) # < 0 refers to column number
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
-## Contributing
-
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
 
 ## Authors
 
-* **Billie Thompson** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+Michael Sweeney (github.com/michaelsweeney)
 
 ## License
 
@@ -82,6 +53,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* Hat tip to anyone whose code was used
-* Inspiration
-* etc
+Thanks to Santosh Philip and his excellent Eppy project for inspiration!
