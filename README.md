@@ -1,6 +1,6 @@
 # eqparse
 
-Python processing for eQUEST SIM, HSR, and INP files
+Python processing for eQUEST SIM and HSR files
 
 ### Getting Started
 
@@ -18,7 +18,7 @@ mysim = eq.LoadSim('C:/myinputfile')
 
 
 ### Installing
-The 'loadSim' object allows access to 'sim', 'hsr', and 'inp' modules (inp module is currently a work in progress).
+The 'loadSim' object allows access to 'sim' and 'hsr' modules
 
 Most reports can be accessed like this, returning Pandas Dataframes:
 
