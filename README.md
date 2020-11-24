@@ -53,6 +53,7 @@ eqparse also has some plotting functions, using Plotly:
 
 Group airside system ss-a reports by system name, pull total cooling & heating energy from each:
 >ssa_df = mysim.sim.ssa().groupby('Object').sum()
+
 Create barplot of cooling/heating for each system:
 >eq.plot.tablebar(ssa_df)
 
