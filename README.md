@@ -38,8 +38,11 @@ In general, the primary functionality eqparse has been designed to be as unopini
 A few example methods (these are generally located at the top-level LoadSim object):
 
 >mysim.annual_summaries() # < returns a dictionary of 'beps', 'bepu', and 'cost' end-use summary dataframes
+>
 >mysim.annual_cost_enduses() # < calculates virtual utility rates and provides cost-level end-use summary similar to standard BEPS / BEPU outputs.
+>
 >mysim.leed_enduses() # < pivots PS-F reports into a more LEED-friendly format for data entry.
+>
 >mysim.sim_print() # < accepts a list of report names, outputs a working SIM file with only the reports passed (useful for compliance-based report export)
 
 eqparse also has some plotting functions, using Plotly:
@@ -48,9 +51,9 @@ eqparse also has some plotting functions, using Plotly:
 >mysim.hsr.plot.heatmap(df, 0) # < 0 refers to column number
 
 
-># group airside system ss-a reports by system name, pull total cooling & heating energy from each
+Group airside system ss-a reports by system name, pull total cooling & heating energy from each:
 >ssa_df = mysim.sim.ssa().groupby('Object').sum()
-> create barplot of cooling/heating for each system
+Create barplot of cooling/heating for each system:
 >eq.plot.tablebar(ssa_df)
 
 ### 
