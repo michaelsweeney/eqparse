@@ -212,7 +212,8 @@ class RptHandler:
                 this_row = []
                 for num in range(len(poslist)):
                     try:
-                        this_row_col = row[poslist[num]                                           :poslist[num + 1]].strip()
+                        this_row_col = row[poslist[num]
+                            :poslist[num + 1]].strip()
                         this_row.append(this_row_col)
                     except:
                         pass
@@ -447,12 +448,11 @@ class RptHandler:
         ssl = try_numeric(ssl)
 
         # total fan from detailed simulation reports summary, for convenience
-        ssl['Total Fan'] = ssl['FAN ELEC DURING HEATING (KWH)'] + ssl['FAN ELEC DURING COOLING (KWH)'] + ssl['FAN ELEC DURING FLOATING (KWH)'] - ssl['FAN ELEC DURING HEAT & COOL KWH)']
+        ssl['Total Fan'] = ssl['FAN ELEC DURING HEATING (KWH)'] + ssl['FAN ELEC DURING COOLING (KWH)'] + \
+            ssl['FAN ELEC DURING FLOATING (KWH)'] - \
+            ssl['FAN ELEC DURING HEAT & COOL KWH)']
         return ssl
-        
-        
-        
-        
+
     def psh(self):
         '              MON  PEAK   (KBTU/HR)   (KBTU/HR)   (KBTU/HR)   (KBTU/HR)       10    20    30    40    50    60    70    80    90   100    +  HOURS'
         psh_col_pat = '%--  %---  %-------  %-------  ---%---  %-------  %------%    %---  %---  %---  %---  %---  %---  %---  %---  %---  %---  %---  %--%'
@@ -515,7 +515,7 @@ class RptHandler:
         return lvb
 
     def bepu(self):  # value       lights     task       eq      htg     clg      ht      pumps     fans      ref     ht p      dhw      ext      total
-        #bepu_col_pat = '%           %---------  %------%  ------  %------%  ------  %------% ------%   ------  %------  % -----   %------  %-----%  -------%'
+        # bepu_col_pat = '%           %---------  %------%  ------  %------%  ------  %------% ------%   ------  %------  % -----   %------  %-----%  -------%'
 
         bepu_col_pat = '%           %----------%------%  ------ %--------%  ------ %------% ------ %   -----%------  % -----  %------  %------  %  -------%'
 
@@ -1393,3 +1393,76 @@ class RptHandler:
         ssqheatdf = ssqheatdf.reset_index(drop=True)
 
         return sspcooldf, sspheatdf, ssqcooldf, ssqheatdf
+
+    def hourly(self='self'):
+
+        with open(self.path) as f:
+            fstr = f.read()
+
+        pages_raw = [x.split('\n') for x in fstr.split('\f')]
+        pages_raw = [x for x in pages_raw if len(x) > 1]
+
+        pages = [x for x in pages_raw if "HOURLY REPORT" in x[2]]
+
+        hourlydict = {}
+        for page in pages:
+            columns = page[4:11]
+            rows = page[11:35]
+
+            spacingrow = columns[-1]
+            spacingrow = spacingrow.replace("----(", "%---(")
+
+            poslist = [i for i, letter in enumerate(
+                spacingrow) if letter == '%']
+            poslist.append(len(spacingrow))
+
+            # get columns
+            parsed_cols = []
+            for col in columns:
+                parsed_col = []
+                lastpos = poslist[0]
+                for pos in poslist[1:]:
+                    parsed_col.append(col[lastpos:pos].strip())
+                    lastpos = pos
+                parsed_cols.append(parsed_col)
+
+            col_df_transposed = pd.DataFrame(parsed_cols).T.values
+            cols = ['_'.join(x).replace('__', '_').replace(
+                "----( ", "(") for x in col_df_transposed]
+
+            # get data values and date index
+            for row in rows:
+                date = row[:6]
+
+                rowsplit = re.split(r'\s{2,}', row)
+
+                date = rowsplit[0]
+                vals = rowsplit[1:]
+
+                for num, val in enumerate(vals):
+                    colname = cols[num]
+
+                    if colname in hourlydict:
+                        hourlydict[colname][date] = val
+                    else:
+                        hourlydict[colname] = {}
+                        hourlydict[colname][date] = val
+
+        df = pd.DataFrame.from_dict(hourlydict)
+
+        df = try_numeric(df)
+
+        df['dt'] = df.index
+
+        df['dt'] = df['dt'].apply(lambda x: str(x).replace(' ', '0'))
+        df['month'] = df['dt'].apply(lambda x: x[:2])
+        df['day'] = df['dt'].apply(lambda x: x[2:4])
+        df['hour'] = df['dt'].apply(lambda x: x[5:6])
+
+        df['year'] = '2021'
+        dtindex = pd.to_datetime(df[['year', 'month', 'day', 'hour']])
+
+        df = df.set_index(dtindex)
+        df = df.drop(['dt', 'year', 'month', 'day', 'hour'], axis=1)
+
+        return df
