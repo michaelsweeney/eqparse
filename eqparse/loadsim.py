@@ -231,13 +231,11 @@ class LoadSim:
                 book.close()
         return leed_psf
 
-    def sim_print(self, reportlist):
+    def sim_print(self, reportlist, directory="Report Outputs"):
         '''
         for printing sim files (i.e. for code/LEED submission) tio PDF, returns 
         new *.SIM with only the items in the reportlist (e.g. ['ES-D', 'BEPS', 'BEPU'])
         '''
-
-        directory = "Report Outputs"
 
         simpath = self.path + '/' + self.fname + '.SIM'
         fdir = self.path + '/' + directory
