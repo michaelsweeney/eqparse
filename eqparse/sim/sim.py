@@ -212,8 +212,7 @@ class RptHandler:
                 this_row = []
                 for num in range(len(poslist)):
                     try:
-                        this_row_col = row[poslist[num]
-                            :poslist[num + 1]].strip()
+                        this_row_col = row[poslist[num]                                           :poslist[num + 1]].strip()
                         this_row.append(this_row_col)
                     except:
                         pass
@@ -1360,9 +1359,7 @@ class RptHandler:
 
         ssqheat = self._make_dirty_rpt_list('SS-Q HEAT PUMP HEATING')
 
-
         ssqheatdict = {}
-        
 
         for k, v in ssqheat.items():
             for num, line in enumerate(v):
@@ -1416,7 +1413,6 @@ class RptHandler:
 
         return ssqheatdf
 
-
     def hourly(self='self'):
 
         with open(self.path) as f:
@@ -1433,7 +1429,10 @@ class RptHandler:
             rows = page[11:35]
 
             spacingrow = columns[-1]
-            spacingrow = spacingrow.replace("----(", "%---(")
+
+            # attempt to add delimeters by both "----( 7)" and "----302-". other conditions?
+            spacingrow = spacingrow.replace(
+                "----(", "%---(").replace("----", "%--(")
 
             poslist = [i for i, letter in enumerate(
                 spacingrow) if letter == '%']
@@ -1453,6 +1452,10 @@ class RptHandler:
             cols = ['_'.join(x).replace('__', '_').replace(
                 "----( ", "(") for x in col_df_transposed]
 
+            # testing column parsing
+            # if "ERV" in ''.join(cols):
+            # print(cols[5:])
+
             # get data values and date index
             for row in rows:
                 date = row[:6]
@@ -1465,7 +1468,6 @@ class RptHandler:
 
                 for num, val in enumerate(vals):
                     colname = cols[num]
-
                     if colname in hourlydict:
                         hourlydict[colname][date] = val
                     else:
