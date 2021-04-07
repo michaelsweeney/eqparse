@@ -1190,25 +1190,14 @@ class RptHandler:
         fandf['System'] = fandf.index
         zonedf['System'] = zonedf.index
 
-        # sysdf['Level'] = 'System'
-        # fandf['Level'] = 'Fan'
-        # fandf['Level'] = 'Zone'
-
         systemdf = pd.concat([sysdf, fandf], axis=1)
 
         return systemdf, zonedf
 
-    def dxperformance(self):
-
+    def sspcool(self):
         sspcool = self._make_dirty_rpt_list('SS-P COOLING')
-        sspheat = self._make_dirty_rpt_list('SS-P HEATING')
-        ssqcool = self._make_dirty_rpt_list('SS-Q HEAT PUMP COOLING')
-        ssqheat = self._make_dirty_rpt_list('SS-Q HEAT PUMP HEATING')
-
         sspcooldict = {}
-        sspheatdict = {}
-        ssqcooldict = {}
-        ssqheatdict = {}
+
         for k, v in sspcool.items():
             for num, line in enumerate(v):
                 if "UNIT TYPE is" in line:
@@ -1249,6 +1238,18 @@ class RptHandler:
                 'Fan Energy Peak (kW)': fanenergy_peak
             }
 
+        sspcooldf = try_numeric(pd.DataFrame(sspcooldict).T)
+        sspcooldf['Object'] = sspcooldf.index
+        sspcooldf['File'] = self.path
+        sspcooldf['rptname'] = 'SSP_COOL'
+        sspcooldf = sspcooldf.reset_index(drop=True)
+        return sspcooldf
+
+    def sspheat(self):
+        sspheat = self._make_dirty_rpt_list('SS-P HEATING')
+
+        sspheatdict = {}
+
         for k, v in sspheat.items():
             for num, line in enumerate(v):
                 if "UNIT TYPE is" in line:
@@ -1287,6 +1288,20 @@ class RptHandler:
                 'Fan Energy Sum (kWh)': fanenergy_sum,
                 'Fan Energy Peak (kW)': fanenergy_peak
             }
+
+        sspheatdf = try_numeric(pd.DataFrame(sspheatdict).T)
+        sspheatdf['Object'] = sspheatdf.index
+        sspheatdf['File'] = self.path
+        sspheatdf['rptname'] = 'SSP_HEAT'
+        sspheatdf = sspheatdf.reset_index(drop=True)
+
+        return sspheatdf
+
+    def ssqcool(self):
+
+        ssqcool = self._make_dirty_rpt_list('SS-Q HEAT PUMP COOLING')
+
+        ssqcooldict = {}
 
         for k, v in ssqcool.items():
             for num, line in enumerate(v):
@@ -1328,6 +1343,26 @@ class RptHandler:
                 'CSPF (WITH PARASITICS)': cspfwithparasitics,
                 'CSPF (WITHOUT PARASITICS)': cspfwithoutparasitics
             }
+
+        ssqcooldf = try_numeric(pd.DataFrame(ssqcooldict).T)
+
+        ssqcooldf['Object'] = ssqcooldf.index
+
+        ssqcooldf['File'] = self.path
+
+        ssqcooldf['rptname'] = 'SSQ_COOL'
+
+        ssqcooldf = ssqcooldf.reset_index(drop=True)
+
+        return ssqcooldf
+
+    def ssqheat(self):
+
+        ssqheat = self._make_dirty_rpt_list('SS-Q HEAT PUMP HEATING')
+
+
+        ssqheatdict = {}
+        
 
         for k, v in ssqheat.items():
             for num, line in enumerate(v):
@@ -1372,27 +1407,15 @@ class RptHandler:
 
             }
 
-        sspcooldf = try_numeric(pd.DataFrame(sspcooldict).T)
-        sspheatdf = try_numeric(pd.DataFrame(sspheatdict).T)
-        ssqcooldf = try_numeric(pd.DataFrame(ssqcooldict).T)
         ssqheatdf = try_numeric(pd.DataFrame(ssqheatdict).T)
-
-        sspcooldf['Object'] = sspcooldf.index
-        sspheatdf['Object'] = sspheatdf.index
-        ssqcooldf['Object'] = ssqcooldf.index
         ssqheatdf['Object'] = ssqheatdf.index
-
-        sspcooldf['File'] = self.path
-        sspheatdf['File'] = self.path
-        ssqcooldf['File'] = self.path
         ssqheatdf['File'] = self.path
+        ssqheatdf['rptname'] = 'SSQ_HEAT'
 
-        sspcooldf = sspcooldf.reset_index(drop=True)
-        sspheatdf = sspheatdf.reset_index(drop=True)
-        ssqcooldf = ssqcooldf.reset_index(drop=True)
         ssqheatdf = ssqheatdf.reset_index(drop=True)
 
-        return sspcooldf, sspheatdf, ssqcooldf, ssqheatdf
+        return ssqheatdf
+
 
     def hourly(self='self'):
 
@@ -1437,6 +1460,7 @@ class RptHandler:
                 rowsplit = re.split(r'\s{2,}', row)
 
                 date = rowsplit[0]
+
                 vals = rowsplit[1:]
 
                 for num, val in enumerate(vals):
@@ -1449,7 +1473,6 @@ class RptHandler:
                         hourlydict[colname][date] = val
 
         df = pd.DataFrame.from_dict(hourlydict)
-
         df = try_numeric(df)
 
         df['dt'] = df.index
@@ -1457,7 +1480,7 @@ class RptHandler:
         df['dt'] = df['dt'].apply(lambda x: str(x).replace(' ', '0'))
         df['month'] = df['dt'].apply(lambda x: x[:2])
         df['day'] = df['dt'].apply(lambda x: x[2:4])
-        df['hour'] = df['dt'].apply(lambda x: x[5:6])
+        df['hour'] = df['dt'].apply(lambda x: x[4:6])
 
         df['year'] = '2021'
         dtindex = pd.to_datetime(df[['year', 'month', 'day', 'hour']])
